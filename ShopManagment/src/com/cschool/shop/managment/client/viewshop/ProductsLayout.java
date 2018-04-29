@@ -19,6 +19,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.view.client.SelectionChangeEvent;
 import com.google.gwt.view.client.SingleSelectionModel;
@@ -28,9 +29,10 @@ public class ProductsLayout extends VerticalPanel {
 	private final ProductServiceRPCAsync productService = GWT.create(ProductServiceRPC.class);
 	
 	private AddProductLayout addProductLayout;
+	private EditProductLayout editProductLayout;
 	
-	SingleSelectionModel<Product> selectionModel;
-	Product selected;
+	private SingleSelectionModel<Product> selectionModel;
+	private Product selected;
 	
 	private HorizontalPanel horizontalPanel;
 	private CellTable<Product> productTable;
@@ -38,6 +40,7 @@ public class ProductsLayout extends VerticalPanel {
 	private Button addButton;
 	private Button editButton;
 	public Button removeButton;
+	private Label productLabel;
 	
 	public ProductsLayout() {
 		initialize();
@@ -49,6 +52,7 @@ public class ProductsLayout extends VerticalPanel {
 	
 	private void initialize() {
 		addButton = new Button("Add");
+		productLabel = new Label();
 
 		removeButton = new Button("Remove");
 		removeButton.setEnabled(false);
@@ -57,12 +61,13 @@ public class ProductsLayout extends VerticalPanel {
 		editButton.setEnabled(false);
 		
 		productTable = new CellTable<>();
-		productTable.setPageSize(10);
+		productTable.setPageSize(100);
 		
 		idColumn = new TextColumn<Product>() {
 			@Override
 			public String getValue(Product product) {
-				return String.valueOf(product.getProductId());
+				System.out.println("Produkt id numer: " + product.getProductId());
+				return product.getProductId()  + "";
 			}
 		};
 		nameColumn = new TextColumn<Product>() {
@@ -95,13 +100,6 @@ public class ProductsLayout extends VerticalPanel {
 				return product.getImage();
 			}
 		};
-		
-		idColumn.setSortable(true);
-		nameColumn.setSortable(true);
-		categoryColumn.setSortable(true);
-		priceColumn.setSortable(true);
-		availableColumn.setSortable(true);
-		imageColumn.setSortable(true);
 
 		productTable.addColumn(idColumn, "ID");
 		productTable.addColumn(nameColumn, "Name");
@@ -109,15 +107,12 @@ public class ProductsLayout extends VerticalPanel {
 		productTable.addColumn(priceColumn, "Price");
 		productTable.addColumn(availableColumn, "Availablity");
 		productTable.addColumn(imageColumn, "Image");
-		
-		
-	
-		
 
 		horizontalPanel = new HorizontalPanel();
 		horizontalPanel.add(addButton);
 		horizontalPanel.add(editButton);
 		horizontalPanel.add(removeButton);
+		horizontalPanel.add(productLabel);
 		horizontalPanel.setSpacing(15);
 			
 		
@@ -131,8 +126,41 @@ public class ProductsLayout extends VerticalPanel {
 				addProductLayout = new AddProductLayout();
 				add(addProductLayout);
 				addProductLayout.show();
+				
+//				if (!addProductLayout.isShowing()) {
+//					refreshProductsTable();
+//				}
+//				productTable.redraw();
 				saveButtonHandler();
-	
+			}
+		});
+		
+		editButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selected = selectionModel.getSelectedObject();
+				editProductLayout = new EditProductLayout(selected);
+				add(editProductLayout);
+				editProductLayout.show();
+				
+				editProductLayout.updateButton.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {		
+
+							productService.updateProduct(editProductLayout.updateProduct(selected), new AsyncCallback<Boolean>() {
+								@Override
+								public void onFailure(Throwable caught) {
+									Window.alert("Coœ siê popsu³o");
+								}
+			
+								@Override
+								public void onSuccess(Boolean result) {
+									Window.alert("Update zrobiony");
+									refreshProductsTable();				
+								}
+							});
+						}
+					});
 			}
 		});
 		
@@ -152,6 +180,7 @@ public class ProductsLayout extends VerticalPanel {
 						refreshProductsTable();	
 						removeButton.setEnabled(false);
 						editButton.setEnabled(false);
+						selectionModel.clear();
 					}
 				});
 			}
@@ -170,40 +199,31 @@ public class ProductsLayout extends VerticalPanel {
 				if (selected != null) {
 					editButton.setEnabled(true);
 					removeButton.setEnabled(true);	
+					productLabel.setText("Name: " + selected.getName() + ", price: " + selected.getPrice()
+							+ ", Category: " + selected.getCategorySet().toString());
 				}	
 			}		
 		});
 	}
-	
+
 	private void saveButtonHandler() {
 		addProductLayout.saveButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
-				Set<Category> category = new HashSet<>();
-				String name = addProductLayout.nameBox.getText();
-				Double price = Double.parseDouble(addProductLayout.priceBox.getText());				
-				String image = addProductLayout.imageBox.getText();
-				boolean available = addProductLayout.availableBox.getValue();
-				
-				if (name.length() == 0 || price == null || image.length() == 0) {
-					Window.alert("NIe dodam produktu bo cos jest nullem");
-				} else {
-					productService.addProduct(new Product(name, category, price, available, image), new AsyncCallback<Boolean>() {
-						@Override
-						public void onFailure(Throwable caught) {
-							// TODO Auto-generated method stu	
-						}
-	
-						@Override
-						public void onSuccess(Boolean result) {
-							refreshProductsTable();	
-						}
-					});
-				} 
-			}
+				productService.addProduct(addProductLayout.createProduct(), new AsyncCallback<Boolean>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						System.out.println("Error creating and adding new product");
+					}
+					@Override
+					public void onSuccess(Boolean result) {
+						refreshProductsTable();	
+					}
+				});
+			} 
 		});
 	}
-	
+
 //	sets list of all products to table
 	public void refreshProductsTable() {
 		productService.getAllProducts(new AsyncCallback<List<Product>>() {	
@@ -211,6 +231,7 @@ public class ProductsLayout extends VerticalPanel {
 			public void onSuccess(List<Product> result) {
 				productTable.setRowCount(result.size(), true);
 				productTable.setRowData(0, result);	
+				StaticFields.setProductsList(result);
 			}
 			
 			@Override

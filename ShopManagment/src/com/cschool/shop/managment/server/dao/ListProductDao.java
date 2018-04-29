@@ -18,9 +18,38 @@ public class ListProductDao implements ProductDao {
 	}
 	
 	@Override
+	public void updateProd(Product product) {
+		if (product == null) {
+			throw new IllegalStateException("Produckt is null. You can't update null product");
+		}		
+//	find this product on product list. removes old and puts new one on the same position in list
+		Product found = findById(product.getProductId());
+		if (found == null) {
+			throw new IllegalArgumentException("There is no product with such Id");
+		} else {
+			System.out.println("Found: "  + found.toString());
+			System.out.println("Przekazany: " + product.toString());
+			int prodListIndex = productList.indexOf(found);
+			productList.remove(found);
+			productList.add(prodListIndex, product);
+		}
+	}
+	
+	@Override
 	public void removeProd(Product product) {
 		productList.remove(product);
 	
+	}
+	
+	@Override
+	public Product findById(int productId) {
+		Product product = null;
+		for (Product eachProduct: productList) {
+			if (eachProduct.getProductId() == productId) {
+				product = eachProduct;
+			}
+		}
+		return product;
 	}
 
 	@Override

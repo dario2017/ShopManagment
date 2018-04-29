@@ -1,6 +1,7 @@
 package com.cschool.shop.managment.client.viewshop;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.cschool.shop.managment.client.service.ProductServiceRPC;
@@ -10,6 +11,7 @@ import com.cschool.shop.managment.shared.model.Product;
 import com.google.gwt.core.shared.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.cellview.client.CellTable;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
@@ -28,10 +30,13 @@ import com.sun.java.swing.plaf.windows.resources.windows;
 
 public class AddProductLayout extends DialogBox {
 	
+	private final ProductServiceRPCAsync productService = GWT.create(ProductServiceRPC.class);
 	
 	private VerticalPanel verticalDialog;
 	private HorizontalPanel hpName, hpPrice, hpAvailable, hpImage, hpButtons;
 	private FormPanel fp;
+	
+	private CategoryPanel catPanel;
 	
 	private Label nameLabel, priceLabel, availableLabel, imageLabel, categoriesLabel;
 	protected TextBox nameBox, priceBox, imageBox;
@@ -39,9 +44,9 @@ public class AddProductLayout extends DialogBox {
 	protected Button saveButton, cancelButton;
 	
 	
-	public AddProductLayout() {
+	public AddProductLayout() {	
 		this.initialize();
-		
+	
 		this.setText("Add product");
 		this.setAnimationEnabled(true);
 		this.center();
@@ -53,8 +58,7 @@ public class AddProductLayout extends DialogBox {
 			public void onClick(ClickEvent event) {
 				hide();	
 			}
-		});
-		
+		});	
 	}
 	
 	private void initialize() {
@@ -75,57 +79,45 @@ public class AddProductLayout extends DialogBox {
 		hpAvailable = new HorizontalPanel();
 		availableLabel = new Label("Available:");
 		availableBox = new CheckBox();
+		availableBox.setValue(false);
 		hpAvailable.add(availableLabel);
 		hpAvailable.add(availableBox);
-		
+	
 		hpImage = new HorizontalPanel();
 		imageLabel = new Label("Image:");
 		imageBox = new TextBox();
 		hpImage.add(imageLabel);
 		hpImage.add(imageBox);
 		
-		
+		catPanel = new CategoryPanel();
 		categoriesLabel = new Label("Categorioes:");
-		
+				
 		hpButtons = new HorizontalPanel();
 		saveButton = new Button("Save");
 		cancelButton = new Button("Cancel");
 		hpButtons.add(saveButton);
 		hpButtons.add(cancelButton);
-		
-		
+			
 		verticalDialog.add(hpName);
 		verticalDialog.add(hpPrice);
 		verticalDialog.add(hpAvailable);
+		verticalDialog.add(catPanel);
 		verticalDialog.add(hpImage);
 		verticalDialog.add(hpButtons);
 	}
 	
-	private void initializeFormPanel() {
-		fp = new FormPanel();
-		fp.setTitle("Tytulek");
+	public Product createProduct() {
+		Set<Category> category = new HashSet<>(catPanel.getChosenCategoriesSet());
+		String name = nameBox.getText();
+		Double price = Double.parseDouble(priceBox.getText());				
+		String image = imageBox.getText();
+		boolean available = availableBox.getValue();
 		
-		verticalDialog = new VerticalPanel();
-		
-		fp.setWidget(verticalDialog);
-		
-		nameLabel = new Label("Name:");
-		nameBox = new TextBox();
-		nameBox.setName("nazwa boxu");
-		verticalDialog.add(nameBox);
-		
-		fp.addSubmitHandler(new FormPanel.SubmitHandler() {
-			
-			@Override
-			public void onSubmit(SubmitEvent event) {
-				if (nameBox.getText().length() == 0) {
-					
-				}
-				
-			}			
-		});
-		
-
+		if (name.length() == 0 || price == null || image.length() == 0) {
+			Window.alert("Unable to create product. Some data is wrong");
+			return null;
+		} 
+		return new Product(name, category, price, available, image);
 	}
-	
+
 }

@@ -12,6 +12,9 @@ import com.cschool.shop.managment.server.dao.exception.UserDoesNotExistException
 import com.cschool.shop.managment.server.model.User;
 
 public class ListUserDao implements UserDao {
+
+// PRZY UPDATE NALEZY POPRAWIC WSTAWIANIE NA LISTE. NOWY USER POWINIEN TRAFIC NA TO SAMO MIEJSCE W INDEXIE LISTY
+	
 	
 	public List<User> usersList = new ArrayList<>();
 	

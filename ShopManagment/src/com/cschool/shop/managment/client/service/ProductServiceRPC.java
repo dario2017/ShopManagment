@@ -13,5 +13,7 @@ public interface ProductServiceRPC extends RemoteService {
 	
 	boolean removeProduct(Product product);
 	
+	boolean updateProduct(Product product);
+	
 	List<Product> getAllProducts();
 }

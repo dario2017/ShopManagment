@@ -11,6 +11,8 @@ public interface ProductServiceRPCAsync {
 	
 	void removeProduct(Product product, AsyncCallback<Boolean> callback);
 
+	void updateProduct(Product product, AsyncCallback<Boolean> callback);
+	
 	void getAllProducts(AsyncCallback<List<Product>> callback);
 
 }

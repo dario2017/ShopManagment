@@ -7,5 +7,8 @@ import com.cschool.shop.managment.shared.model.Category;
 
 public interface CategoryDao {
 	void addCategory(Category category);
-	List<Category> getCategoryList();
+	
+	void removeCategory(Category category);
+	
+	Set<Category> getCategorySet();
 }

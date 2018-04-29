@@ -1,12 +1,17 @@
 package com.cschool.shop.managment.client.viewshop;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.cschool.shop.managment.client.service.CategoryServiceRPC;
 import com.cschool.shop.managment.client.service.CategoryServiceRPCAsync;
+import com.cschool.shop.managment.client.service.ProductServiceRPC;
+import com.cschool.shop.managment.client.service.ProductServiceRPCAsync;
 import com.cschool.shop.managment.shared.model.Category;
+import com.cschool.shop.managment.shared.model.Product;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -15,21 +20,33 @@ import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.google.gwt.view.client.SelectionChangeEvent;
+import com.google.gwt.view.client.SingleSelectionModel;
 
 public class CategoryLayout extends VerticalPanel {
 	
-	private final CategoryServiceRPCAsync categoryService = GWT.create(CategoryServiceRPC.class);	
+	private final CategoryServiceRPCAsync categoryService = GWT.create(CategoryServiceRPC.class);
+	private final ProductServiceRPCAsync productService = GWT.create(ProductServiceRPC.class);
 	
 	private AddCategoryLayout addCategoryLayout;
 	
+	private List<Product> productsList;
+	private Set<Category> categoriesSet;
+	private Map<Category, List<Product>> categoryAndProductMap;
+	
+	private SingleSelectionModel<Category> selectionModel;
+	private Category selected;
+	
+	private HorizontalPanel hpButtons;
 	private CellTable<Category> categoryTable;
 	private TextColumn<Category> idTable, nameTable;
-	private Button addButton;
+	private Button addButton, removeButton;
 	
 	public CategoryLayout() {
 		initialize();
-		this.add(addButton);
+		this.add(hpButtons);
 		this.add(categoryTable);
 		
 		addButton.addClickHandler(new ClickHandler() {
@@ -45,6 +62,8 @@ public class CategoryLayout extends VerticalPanel {
 						String name = addCategoryLayout.nameBox.getText();
 						if (name.length() == 0) {
 							Window.alert("Cannot add category with empty name");
+						} else if (isCategoryAlreadyExist(name)) {
+							Window.alert("Category with that name already exist in list");
 						} else {
 							categoryService.addCategory(new Category(name), new AsyncCallback<Boolean>() {
 
@@ -67,11 +86,38 @@ public class CategoryLayout extends VerticalPanel {
 				});
 			}
 		});
+		
+		removeButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selected = selectionModel.getSelectedObject();
+				if (isCategoryHasProduct(selected)) {
+					Window.alert("Category is in product. You can't delete it");
+				} else {
+					categoryService.removeCategory(selected, new AsyncCallback<Boolean>() {
+						@Override
+						public void onFailure(Throwable caught) {
+							System.out.println("Some error occured");
+							Window.alert("error");
+						}
+						@Override
+						public void onSuccess(Boolean result) {
+							Window.alert("Category has been removed");
+							refreshCategoryTable();
+						}
+					});
+				}
+			}
+		});
 
 	}
 	
 	private void initialize() {
 		addButton = new Button("Add category");
+		removeButton = new Button("Remove category");
+		hpButtons = new HorizontalPanel();
+		hpButtons.add(addButton);
+		hpButtons.add(removeButton);
 		
 		categoryTable = new CellTable<>();
 		
@@ -90,32 +136,96 @@ public class CategoryLayout extends VerticalPanel {
 		
 		categoryTable.addColumn(idTable, "ID");
 		categoryTable.addColumn(nameTable, "Category");
-
-		refreshCategoryTable();
 		
-//		categoryService.getAllCategories(new AsyncCallback<List<Category>>() {
-//			@Override
-//			public void onFailure(Throwable caught) {
-//				Window.alert("B³¹d w Category async (onFailure)");	
-//			}
-//
-//			@Override
-//			public void onSuccess(List<Category> result) {	
-//				categoryTable.setRowData(result);
-//			}	
-//		});	
+		refreshCategoryTable();
+		getAllProducts();
+		selectionModel();
+		
+
+	}
+	
+	private boolean isCategoryAlreadyExist(String name) {
+		for (Category eachCategory: categoriesSet) {
+			if (eachCategory.getCategoryName().equalsIgnoreCase(name)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isCategoryHasProduct(Category selected) {
+//		getAllProducts();
+		productsList = StaticFields.getProductsList();
+		for (Product eachProduct: productsList) {
+			if (eachProduct.getCategorySet().contains(selected)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void getAllProducts() {
+		productService.getAllProducts(new AsyncCallback<List<Product>>() {
+			@Override
+			public void onFailure(Throwable caught) {
+				System.out.println("Error in categoryLayout");				
+			}
+
+			@Override
+			public void onSuccess(List<Product> result) {
+				productsList = result;				
+			}
+		});
+	}
+
+//	stworzyc mape ktora zawiera kategorie  i produkty
+//	private Map<Category, List<Product>> createCategoryAndProductMap(){
+//		categoryAndProductMap = new HashMap<>();
+//		refreshCategoryTable();
+//		getAllProducts();
+//		for (Category eachCategory: categoriesSet) {
+//			categoryAndProductMap.put(eachCategory, productsList);
+//		}
+//		Window.alert(categoryAndProductMap.toString());
+////		for (Category eachCategory: categoriesSet) {
+////			for (Product eachProduct: productsList) {
+////				if (eachProduct.getCategorySet().contains(eachCategory)) {
+////					List<Product> productsCategoryList = categoryAndProductMap.get(eachCategory);
+////					if (productsCategoryList == null) {
+////						productsCategoryList = new ArrayList<>();
+////					}
+////					productsCategoryList.add(eachProduct);
+////					categoryAndProductMap.put(eachCategory, productsCategoryList);
+////				}
+////			}
+////		}
+//		return categoryAndProductMap;
+//	}
+	
+	private void selectionModel() {
+		selectionModel = new SingleSelectionModel();
+		categoryTable.setSelectionModel(selectionModel);
+		selectionModel.addSelectionChangeHandler(new SelectionChangeEvent.Handler() {
+			@Override
+			public void onSelectionChange(SelectionChangeEvent event) {
+				selected = selectionModel.getSelectedObject();
+			}
+		});
 	}
 	
 	private void refreshCategoryTable() {
-		categoryService.getAllCategories(new AsyncCallback<List<Category>>() {
+		categoryService.getAllCategories(new AsyncCallback<Set<Category>>() {
 			@Override
 			public void onFailure(Throwable caught) {
 				Window.alert("B³¹d w Category async (onFailure)");	
 			}
 
 			@Override
-			public void onSuccess(List<Category> result) {	
-				categoryTable.setRowData(result);
+			public void onSuccess(Set<Category> result) {
+				categoriesSet = result;
+				categoryTable.setRowData(new ArrayList<Category>(result));
+				
+				StaticFields.setCategorySet(result);
 			}	
 		});	
 	}

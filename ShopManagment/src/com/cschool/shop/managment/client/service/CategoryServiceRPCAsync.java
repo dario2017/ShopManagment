@@ -9,6 +9,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 public interface CategoryServiceRPCAsync {
 
 	void addCategory(Category category, AsyncCallback<Boolean> callback);
-	void getAllCategories(AsyncCallback<List<Category>> callback);
+	
+	void removeCategory(Category category, AsyncCallback<Boolean> callback);
+	
+	void getAllCategories(AsyncCallback<Set<Category>> callback);
 	
 }

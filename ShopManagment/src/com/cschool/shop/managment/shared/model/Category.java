@@ -2,6 +2,7 @@ package com.cschool.shop.managment.shared.model;
 
 import java.io.Serializable;
 
+import com.cschool.shop.managment.client.viewshop.StaticFields;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Category implements IsSerializable {
@@ -14,7 +15,23 @@ public class Category implements IsSerializable {
 	
 	public Category(String categoryName) {
 		idCounter++;
-		categoryId = idCounter;
+		if (StaticFields.getCategorySet().size() != 0) {
+			int highestId = 0;
+			for (Category each: StaticFields.getCategorySet()) {
+				if (each.getCategoryId() > highestId) {
+					highestId = each.getCategoryId();
+				}
+			}
+			this.categoryId = highestId + 1;
+		} else {
+			this.categoryId = idCounter;
+		}
+		this.categoryName = categoryName;
+	}
+	
+//	Contructor which manually sets Id
+	public Category(int startId, String categoryName) {
+		this.categoryId = ++idCounter;
 		this.categoryName = categoryName;
 	}
 
@@ -52,6 +69,10 @@ public class Category implements IsSerializable {
 			return false;
 		return true;
 	}
+
+
+
+
 	
 	
 	

@@ -2,12 +2,14 @@ package com.cschool.shop.managment.shared.model;
 
 import java.io.Serializable;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import com.cschool.shop.managment.client.viewshop.StaticFields;
 import com.cschool.shop.managment.shared.exception.EmptyFieldInProductConstructorException;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Product implements IsSerializable {
-	private static int idCounter;
+	private static int counterId;
 	private int productId;
 	private String name;
 	private Set<Category> categorySet;
@@ -16,13 +18,31 @@ public class Product implements IsSerializable {
 	private String image;
 	
 	public Product() {
-		idCounter++;
-		this.productId = idCounter;
 	}
 	
-	public Product(String name, Set<Category> categorySet, double price, boolean available, String image) {
-		idCounter++;
-		this.productId = idCounter;
+	public Product(String name, Set<Category> categorySet, double price, boolean available, String image) {		
+		counterId++;
+		if (StaticFields.getProductsList().size() != 0) {
+			int highestId = 0;
+			for (Product each: StaticFields.getProductsList()) {
+				if (each.getProductId() > highestId) {
+					highestId = each.getProductId();
+				}			
+			}
+			this.productId = highestId + 1;
+		} else {
+			this.productId = counterId;
+		}
+		this.name = name;
+		this.categorySet = categorySet;
+		this.price = price;
+		this.available = available;
+		this.image = image;
+	}
+
+//	Contructor which manually sets Id
+	public Product(int startId, String name, Set<Category> categorySet, double price, boolean available, String image) {		
+		this.productId = ++counterId;
 		this.name = name;
 		this.categorySet = categorySet;
 		this.price = price;

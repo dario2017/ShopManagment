@@ -10,5 +10,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("category")
 public interface CategoryServiceRPC extends RemoteService {
 	boolean addCategory(Category category);
-	List<Category> getAllCategories();
+	
+	boolean removeCategory(Category category);
+	
+	Set<Category> getAllCategories();
 }

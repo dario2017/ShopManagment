@@ -29,7 +29,7 @@ public class ShopManagment implements EntryPoint {
 	public void onModuleLoad() {
 		VerticalPanel mainPanel = new VerticalPanel();
 	
-//		mainPanel.getElement().setAttribute("align", "center");
+		mainPanel.getElement().setAttribute("align", "center");
 		
 		LoginLayout loginLayout = new LoginLayout(mainPanel);
 		mainPanel.add(loginLayout);

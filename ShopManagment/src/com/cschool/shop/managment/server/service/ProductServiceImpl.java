@@ -26,6 +26,11 @@ public class ProductServiceImpl implements ProductService {
 	public void removeProd(Product product) {
 		this.productDao.removeProd(product);
 	}
+	
+	@Override
+	public void uptadeProd(Product product) {
+		this.productDao.updateProd(product);
+	}
 
 	@Override
 	public List<Product> getProductList() {
