@@ -1,20 +1,17 @@
 package com.cschool.shop.managment.server.dao;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.cschool.shop.managment.shared.model.Category;
 
-public class SetCategoryDao implements CategoryDao {
-	
+public class SetCategoryDao implements CategoryDao {	
 	private Set<Category> categorySet;
-	
 	
 	public SetCategoryDao() {
 		categorySet = new HashSet<>();
 	}
+	
 	@Override
 	public Set<Category> getCategorySet() {
 		return categorySet;

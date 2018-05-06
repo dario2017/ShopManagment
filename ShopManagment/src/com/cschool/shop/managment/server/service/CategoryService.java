@@ -1,6 +1,5 @@
 package com.cschool.shop.managment.server.service;
 
-import java.util.List;
 import java.util.Set;
 
 import com.cschool.shop.managment.shared.model.Category;

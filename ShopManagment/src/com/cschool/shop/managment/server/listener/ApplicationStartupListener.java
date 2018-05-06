@@ -27,7 +27,6 @@ public class ApplicationStartupListener implements ServletContextListener {
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		// TODO Auto-generated method stub
 		
 	}
 
@@ -42,31 +41,45 @@ public class ApplicationStartupListener implements ServletContextListener {
 		CategoryService categoryService = new CategoryServiceImpl(new SetCategoryDao());
 		event.getServletContext().setAttribute(CATEGORY_SERVICE_ATTRIBUTE, categoryService);
 		
-	
 		User user1 = new User(1, "admin", "admin".toCharArray());
 		userService.add(user1);
 		
-		Category category1 = new Category(1, "Pojazdy");
-		Category category2 = new Category(2, "Obuwie");
-		Set<Category> categorySet1 = new HashSet<>();
-		Set<Category> categorySet2 = new HashSet<>();
-		categorySet1.add(category1);
-		categorySet2.add(category2);
+		Category teleskopy = new Category(1, "Teleskopy");
+		Category lornetki = new Category(2, "Lornetki");
+		Category refraktory = new Category(3, "Refraktory");
+		Category newtona = new Category(4, "Newtona");
+		Category turystyczne = new Category(5, "Turystyczne");
+		Category wojskowe = new Category(6, "Wojskowe");
 		
-		System.out.println("categoria 1: " + category1.toString());
-		categoryService.addCategory(category1);
-		categoryService.addCategory(category2);
-		System.out.println("category service list: " + categoryService.toString());
+		Set<Category> teleskopRefraktor = new HashSet<>();
+		Set<Category> teleskopNewton = new HashSet<>();
+		Set<Category> lornetkaWojskowa = new HashSet<>();
+		Set<Category> lornetkaTurystyczna = new HashSet<>();
 		
+		teleskopRefraktor.add(teleskopy);
+		teleskopRefraktor.add(refraktory);
+		teleskopNewton.add(teleskopy);
+		teleskopNewton.add(newtona);
+		lornetkaWojskowa.add(lornetki);
+		lornetkaWojskowa.add(wojskowe);
+		lornetkaTurystyczna.add(lornetki);
+		lornetkaTurystyczna.add(turystyczne);
 		
-		Product product1 = new Product(1,"Rower GT Avalanche 1.0", categorySet1, 1400, true, "brak");		
-		Product product2 = new Product(2, "Sanki", categorySet1, 2800, true, "brak");	
-		Product product3 = new Product(3, "Adidasy", categorySet2, 550, true, "brak");
+		categoryService.addCategory(teleskopy);
+		categoryService.addCategory(lornetki);
+		categoryService.addCategory(refraktory);
+		categoryService.addCategory(newtona);
+		categoryService.addCategory(turystyczne);
+		categoryService.addCategory(wojskowe);
 		
+		Product product1 = new Product(1,"Teleskop Sky-Watcher Synta R-70/900", teleskopRefraktor, 625, true, "https://teleskopy.pl/images/150_teleskop_sk709eq1.jpg");		
+		Product product2 = new Product(2, "Teleskop Levenhuk SkyMatic 135 GT Newton", teleskopNewton, 1949, true, "https://teleskopy.pl/images/150_levenhuk_n135_gt_skymatic.jpg");	
+		Product product3 = new Product(3, "Lornetka FUJINON 10x50 FMTR-SX", lornetkaWojskowa, 3299, true, "https://teleskopy.pl/images/150_fujinon_10x50_fmtr-sx.jpg");
+		Product product4 = new Product(4, "Lornetka Delta Optical 10x50 Entry, lornetkaTurystyczna", lornetkaTurystyczna, 259, false, "https://teleskopy.pl/images/150_delta_optical_entry_10x50.jpg");
+			
 		productService.add(product1);
 		productService.add(product2);
 		productService.add(product3);
-		System.out.println("Lista PRODUKTOW!!!: " + productService.getProductList().toString());
-	}
-	
+		productService.add(product4);
+	}	
 }

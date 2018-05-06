@@ -31,7 +31,7 @@ public class Category implements IsSerializable {
 	
 //	Contructor which manually sets Id
 	public Category(int startId, String categoryName) {
-		this.categoryId = ++idCounter;
+		this.categoryId = startId;
 		this.categoryName = categoryName;
 	}
 
@@ -69,11 +69,4 @@ public class Category implements IsSerializable {
 			return false;
 		return true;
 	}
-
-
-
-
-	
-	
-	
 }

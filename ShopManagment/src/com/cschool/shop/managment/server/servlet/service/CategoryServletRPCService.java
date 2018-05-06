@@ -13,7 +13,7 @@ public class CategoryServletRPCService extends RemoteServiceServlet implements C
 
 	@Override
 	public boolean addCategory(Category category) {
-		getCategoryService().getCategorySet().add(category);
+		getCategoryService().addCategory(category);
 		return true;
 	}
 	

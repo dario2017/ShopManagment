@@ -11,18 +11,12 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 public class ShopLayout extends TabPanel {
 	
 	public ShopLayout() {
-		
-//	w products mamy liste produktow a powyzej tej listy jest button Add
-//	po kliknieciu na dany produkt powinien wyswietlac sie button remove oraz edit obok 
-//		buttonu add
-		
-		
 		String tab1 = "Products";
 		String tab2 = "Categories";
 
 		this.add(new ProductsLayout(), tab1);
 		this.add(new CategoryLayout(), tab2);
-
+		this.selectTab(0);
 	}
 	
 }

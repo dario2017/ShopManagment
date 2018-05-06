@@ -12,15 +12,13 @@ public class ProductServletRPCService extends RemoteServiceServlet implements Pr
 
 	@Override
 	public boolean addProduct(Product product) {
-		System.out.println("Produkt id: " + product.getProductId());
-		System.out.println("Liczba produktow w liscie: " + getProductService().getProductList().size());
 		getProductService().add(product);
 		return true;
 	}
 	
 	@Override
 	public boolean removeProduct(Product product) {
-		getProductService().getProductList().remove(product);
+		getProductService().removeProd(product);
 		return true;
 	}
 	
@@ -36,8 +34,7 @@ public class ProductServletRPCService extends RemoteServiceServlet implements Pr
 	}
 	
 	public ProductService getProductService() {
-		return (ProductService) getServletContext().getAttribute(ApplicationStartupListener.PRODUCT_SERVICE_ATTRIBUTE);
-		
+		return (ProductService) getServletContext().getAttribute(ApplicationStartupListener.PRODUCT_SERVICE_ATTRIBUTE);		
 	}
 
 }

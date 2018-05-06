@@ -7,8 +7,8 @@ import com.cschool.shop.managment.shared.model.Category;
 import com.cschool.shop.managment.shared.model.Product;
 
 public class StaticFields {
-	public static List<Product> productsList;
-	public static Set<Category> categorySet;
+	private static List<Product> productsList;
+	private static Set<Category> categorySet;
 	
 	public static List<Product> getProductsList() {
 		return productsList;
@@ -22,6 +22,5 @@ public class StaticFields {
 	public static void setCategorySet(Set<Category> categoryList) {
 		StaticFields.categorySet = categoryList;
 	}
-	
 	
 }

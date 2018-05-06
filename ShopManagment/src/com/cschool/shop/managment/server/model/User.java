@@ -11,7 +11,6 @@ public class User {
 		this.login = login;
 	}
 	
-	
 	public User(long id, String login, char[] password) {
 		if (id <= 0) {
 			throw new IllegalArgumentException("Id cannot be <= 0 ");
@@ -27,15 +26,19 @@ public class User {
 		this.login = login;
 		this.password = password;
 	}
+	
 	public long getId() {
 		return id;
 	}
+	
 	public String getLogin() {
 		return login;
 	}
+	
 	public char[] getPassword() {
 		return password;
 	}
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -43,6 +46,7 @@ public class User {
 		result = prime * result + (int) (id ^ (id >>> 32));
 		return result;
 	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -57,13 +61,9 @@ public class User {
 		return true;
 	}
 
-
 	@Override
 	public String toString() {
 		return "User [id=" + id + ", login=" + login + ", password=" + Arrays.toString(password) + "]";
 	}
-	
-	
-	
-	
+
 }

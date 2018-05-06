@@ -11,7 +11,6 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 
 public class AddCategoryLayout extends DialogBox {
 	
-	
 	private VerticalPanel verticalPanel;
 	private HorizontalPanel hpName, hpButton;
 	private Label nameLabel;
@@ -23,10 +22,10 @@ public class AddCategoryLayout extends DialogBox {
 		
 		this.setText("Add category");
 		this.setAnimationEnabled(true);
-		this.center();
 		
 		this.add(verticalPanel);
-		
+		this.setPopupPosition(150, 150);
+
 		cancelButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(ClickEvent event) {
@@ -46,12 +45,14 @@ public class AddCategoryLayout extends DialogBox {
 		
 		hpName.add(nameLabel);
 		hpName.add(nameBox);
+		hpName.setWidth("100%");
 		
 		hpButton.add(saveButton);
 		hpButton.add(cancelButton);
 		
 		verticalPanel.add(hpName);
 		verticalPanel.add(hpButton);
+		verticalPanel.setSpacing(5);
 		
 	}
 }

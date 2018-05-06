@@ -11,9 +11,7 @@ public class LoginServletService extends RemoteServiceServlet implements LoginSe
 
 	@Override
 	public boolean login(String login, char[] password) {
-//	DLA PRZYSPIESZENIA TESTOWANIA LOGOWANIE WYLACZONE
-//		return getUserService().findByLoginAndPassword(login, password) != null;
-		return true;
+		return getUserService().findByLoginAndPassword(login, password) != null;
 	}
 
 	

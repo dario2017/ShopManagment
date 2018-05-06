@@ -2,19 +2,12 @@ package com.cschool.shop.managment.server.dao;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.commons.collections.iterators.IteratorChain;
-
 import com.cschool.shop.managment.server.dao.exception.UserAlreadyExistException;
-import com.cschool.shop.managment.server.dao.exception.UserDoesNotExistException;
 import com.cschool.shop.managment.server.model.User;
 
 public class ListUserDao implements UserDao {
-
-// PRZY UPDATE NALEZY POPRAWIC WSTAWIANIE NA LISTE. NOWY USER POWINIEN TRAFIC NA TO SAMO MIEJSCE W INDEXIE LISTY
-	
 	
 	public List<User> usersList = new ArrayList<>();
 	
@@ -55,23 +48,7 @@ public class ListUserDao implements UserDao {
 		} else {
 			usersList.remove(found);
 			usersList.add(user);
-		}
-		
-//	old, longer version
-//		boolean isUserUpdated = false;
-//		Iterator<User> it = usersList.iterator();
-//		while (it.hasNext()) {
-//			User nextUser = (User) it.next();
-//			if (nextUser.getId() == user.getId()) {
-//				usersList.remove(nextUser);
-//				usersList.add(user);
-//				isUserUpdated = true;
-//				break;
-//			}
-//		}
-//		if (!isUserUpdated) {
-//			usersList.add(user);
-//		}		
+		}		
 	}
 
 	@Override

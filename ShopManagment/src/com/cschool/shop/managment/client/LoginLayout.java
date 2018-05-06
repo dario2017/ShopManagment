@@ -12,13 +12,9 @@ import com.google.gwt.event.dom.client.KeyDownHandler;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.FlowPanel;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
-import com.google.gwt.user.client.ui.LayoutPanel;
 import com.google.gwt.user.client.ui.PasswordTextBox;
-import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.user.client.ui.VerticalPanel;
 
@@ -27,17 +23,18 @@ public class LoginLayout extends VerticalPanel {
 	private final LoginServiceRPCAsync loginService = GWT.create(LoginServiceRPC.class);
 	
 	private VerticalPanel mainPanel;
-	private HorizontalPanel panelLogin;
-	private HorizontalPanel panelPassword;
+	
+	private VerticalPanel panelLogin;
+	private VerticalPanel panelPassword;
+	private HorizontalPanel panelError;
+	private HorizontalPanel loginPanel;
 	private Label loginLabel;
 	private Label passwordLabel;
+	private Label errorLabel;
 	private TextBox loginBox;
 	private PasswordTextBox passwordBox;
-	private HorizontalPanel panelError;
-	private Label errorLabel;
-	private HorizontalPanel loginPanel;
 	private Button loginButton;
-	
+
 	public LoginLayout(VerticalPanel mainPanel) {
 		this.mainPanel = mainPanel;
 		
@@ -47,20 +44,16 @@ public class LoginLayout extends VerticalPanel {
 		this.add(panelPassword);
 		this.add(errorLabel);
 		this.add(loginPanel);
-		
-		
-
 	}
 	
-	private void initialize() {
-		panelLogin = new HorizontalPanel();
+	private void initialize() {		
+		panelLogin = new VerticalPanel();
 		loginLabel = new Label("Login: ");
 		loginBox = new TextBox();
 		panelLogin.add(loginLabel);
 		panelLogin.add(loginBox);
-	
 		
-		panelPassword= new HorizontalPanel();
+		panelPassword= new VerticalPanel();
 		passwordLabel = new Label("Password: ");
 		passwordBox = new PasswordTextBox();
 		panelPassword.add(passwordLabel);
@@ -78,26 +71,7 @@ public class LoginLayout extends VerticalPanel {
 		loginButton.addClickHandler(new ClickHandler() {	
 			@Override
 			public void onClick(ClickEvent event) {
-				
-				loginService.login(loginBox.getText(), passwordBox.getText().toCharArray(), new AsyncCallback<Boolean>(){
-					@Override
-					public void onFailure(Throwable caught) {
-						errorLabel.setVisible(true);
-						
-					}
-					@Override
-					public void onSuccess(Boolean result) {
-						if (result) {				
-//							Window.alert("You have been logged succesfully");
-							mainPanel.clear();
-							ShopLayout shopLayout = new ShopLayout();
-							mainPanel.add(shopLayout);
-						} else {
-							Window.alert("Wrong login or password");
-
-						}
-					}		
-				});	
+				tryToLogIn();
 			}
 		});
 		
@@ -105,26 +79,28 @@ public class LoginLayout extends VerticalPanel {
 			@Override
 			public void onKeyDown(KeyDownEvent event) {
 				if (event.getNativeKeyCode() == KeyCodes.KEY_ENTER) {
-					loginService.login(loginBox.getText(), passwordBox.getText().toCharArray(), new AsyncCallback<Boolean>(){
-						@Override
-						public void onFailure(Throwable caught) {
-							errorLabel.setVisible(true);
-							
-						}
-						@Override
-						public void onSuccess(Boolean result) {
-							if (result) {				
-//								Window.alert("You have been logged succesfully");
-								mainPanel.clear();
-								ShopLayout shopLayout = new ShopLayout();
-								mainPanel.add(shopLayout);
-							} else {
-								Window.alert("Wrong login or password");
-							}
-						}		
-					});	
+					tryToLogIn();
 				}
 			}
 		});
+	}
+	
+	public void tryToLogIn() {
+		loginService.login(loginBox.getText(), passwordBox.getText().toCharArray(), new AsyncCallback<Boolean>(){
+			@Override
+			public void onFailure(Throwable caught) {
+				errorLabel.setVisible(true);	
+			}
+			@Override
+			public void onSuccess(Boolean result) {
+				if (result) {				
+					mainPanel.clear();
+					ShopLayout shopLayout = new ShopLayout();
+					mainPanel.add(shopLayout);
+				} else {
+					Window.alert("Wrong login or password");
+				}
+			}		
+		});	
 	}
 }

@@ -2,10 +2,8 @@ package com.cschool.shop.managment.shared.model;
 
 import java.io.Serializable;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import com.cschool.shop.managment.client.viewshop.StaticFields;
-import com.cschool.shop.managment.shared.exception.EmptyFieldInProductConstructorException;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class Product implements IsSerializable {
@@ -42,7 +40,7 @@ public class Product implements IsSerializable {
 
 //	Contructor which manually sets Id
 	public Product(int startId, String name, Set<Category> categorySet, double price, boolean available, String image) {		
-		this.productId = ++counterId;
+		this.productId = startId;
 		this.name = name;
 		this.categorySet = categorySet;
 		this.price = price;
@@ -121,8 +119,4 @@ public class Product implements IsSerializable {
 			return false;
 		return true;
 	}
-	
-	
-	
-	
 }

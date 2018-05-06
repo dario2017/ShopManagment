@@ -7,12 +7,7 @@ public class UserServiceImpl implements UserService {
 
 	private final UserDao userDao;
 	
-	public UserServiceImpl(UserDao userDao) {
-		// czy nie null
-		if (userDao == null) {
-			throw new IllegalArgumentException("UserDao cannot be null");
-		}
-		
+	public UserServiceImpl(UserDao userDao) {	
 		this.userDao = userDao;
 	}
 	

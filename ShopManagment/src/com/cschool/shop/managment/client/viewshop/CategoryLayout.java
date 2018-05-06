@@ -1,9 +1,7 @@
 package com.cschool.shop.managment.client.viewshop;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import com.cschool.shop.managment.client.service.CategoryServiceRPC;
@@ -34,7 +32,6 @@ public class CategoryLayout extends VerticalPanel {
 	
 	private List<Product> productsList;
 	private Set<Category> categoriesSet;
-	private Map<Category, List<Product>> categoryAndProductMap;
 	
 	private SingleSelectionModel<Category> selectionModel;
 	private Category selected;
@@ -55,8 +52,7 @@ public class CategoryLayout extends VerticalPanel {
 				addCategoryLayout = new AddCategoryLayout();
 				add(addCategoryLayout);
 				addCategoryLayout.show();
-				addCategoryLayout.saveButton.addClickHandler(new ClickHandler() {
-					
+				addCategoryLayout.saveButton.addClickHandler(new ClickHandler() {		
 					@Override
 					public void onClick(ClickEvent event) {
 						String name = addCategoryLayout.nameBox.getText();
@@ -66,19 +62,16 @@ public class CategoryLayout extends VerticalPanel {
 							Window.alert("Category with that name already exist in list");
 						} else {
 							categoryService.addCategory(new Category(name), new AsyncCallback<Boolean>() {
-
 								@Override
 								public void onFailure(Throwable caught) {
-									// TODO Auto-generated method stub
-									
+									System.out.println("Failure: " + caught.getMessage());			
 								}
 
 								@Override
 								public void onSuccess(Boolean result) {
 									refreshCategoryTable();
-									
-								}
-								
+									addCategoryLayout.hide();
+								}							
 							});
 						}
 						
@@ -97,8 +90,7 @@ public class CategoryLayout extends VerticalPanel {
 					categoryService.removeCategory(selected, new AsyncCallback<Boolean>() {
 						@Override
 						public void onFailure(Throwable caught) {
-							System.out.println("Some error occured");
-							Window.alert("error");
+							System.out.println("Failure: " + caught.getMessage());	
 						}
 						@Override
 						public void onSuccess(Boolean result) {
@@ -109,7 +101,6 @@ public class CategoryLayout extends VerticalPanel {
 				}
 			}
 		});
-
 	}
 	
 	private void initialize() {
@@ -137,11 +128,12 @@ public class CategoryLayout extends VerticalPanel {
 		categoryTable.addColumn(idTable, "ID");
 		categoryTable.addColumn(nameTable, "Category");
 		
+		categoryTable.setWidth("100%", true);
+		categoryTable.setColumnWidth(1, "90%");
+		
 		refreshCategoryTable();
 		getAllProducts();
 		selectionModel();
-		
-
 	}
 	
 	private boolean isCategoryAlreadyExist(String name) {
@@ -154,7 +146,6 @@ public class CategoryLayout extends VerticalPanel {
 	}
 	
 	private boolean isCategoryHasProduct(Category selected) {
-//		getAllProducts();
 		productsList = StaticFields.getProductsList();
 		for (Product eachProduct: productsList) {
 			if (eachProduct.getCategorySet().contains(selected)) {
@@ -168,7 +159,7 @@ public class CategoryLayout extends VerticalPanel {
 		productService.getAllProducts(new AsyncCallback<List<Product>>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				System.out.println("Error in categoryLayout");				
+				System.out.println("Failure: " + caught.getMessage());				
 			}
 
 			@Override
@@ -177,30 +168,6 @@ public class CategoryLayout extends VerticalPanel {
 			}
 		});
 	}
-
-//	stworzyc mape ktora zawiera kategorie  i produkty
-//	private Map<Category, List<Product>> createCategoryAndProductMap(){
-//		categoryAndProductMap = new HashMap<>();
-//		refreshCategoryTable();
-//		getAllProducts();
-//		for (Category eachCategory: categoriesSet) {
-//			categoryAndProductMap.put(eachCategory, productsList);
-//		}
-//		Window.alert(categoryAndProductMap.toString());
-////		for (Category eachCategory: categoriesSet) {
-////			for (Product eachProduct: productsList) {
-////				if (eachProduct.getCategorySet().contains(eachCategory)) {
-////					List<Product> productsCategoryList = categoryAndProductMap.get(eachCategory);
-////					if (productsCategoryList == null) {
-////						productsCategoryList = new ArrayList<>();
-////					}
-////					productsCategoryList.add(eachProduct);
-////					categoryAndProductMap.put(eachCategory, productsCategoryList);
-////				}
-////			}
-////		}
-//		return categoryAndProductMap;
-//	}
 	
 	private void selectionModel() {
 		selectionModel = new SingleSelectionModel();
@@ -217,7 +184,7 @@ public class CategoryLayout extends VerticalPanel {
 		categoryService.getAllCategories(new AsyncCallback<Set<Category>>() {
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("B³¹d w Category async (onFailure)");	
+				System.out.println("Failure: " + caught.getMessage());	
 			}
 
 			@Override

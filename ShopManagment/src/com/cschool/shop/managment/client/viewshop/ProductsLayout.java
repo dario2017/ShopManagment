@@ -9,14 +9,20 @@ import com.cschool.shop.managment.client.service.ProductServiceRPC;
 import com.cschool.shop.managment.client.service.ProductServiceRPCAsync;
 import com.cschool.shop.managment.shared.model.Category;
 import com.cschool.shop.managment.shared.model.Product;
+import com.google.gwt.cell.client.Cell.Context;
+import com.google.gwt.cell.client.CheckboxCell;
+import com.google.gwt.cell.client.ClickableTextCell;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.CellTable;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.TextColumn;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Button;
+import com.google.gwt.user.client.ui.CheckBox;
 import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.user.client.ui.Label;
@@ -36,18 +42,19 @@ public class ProductsLayout extends VerticalPanel {
 	
 	private HorizontalPanel horizontalPanel;
 	private CellTable<Product> productTable;
-	private TextColumn<Product> idColumn, nameColumn, categoryColumn, priceColumn, availableColumn, imageColumn;
-	private Button addButton;
-	private Button editButton;
-	public Button removeButton;
+	private ClickableTextCell imageCell;
+	private Column<Product, Boolean> availableColumn;
+	private Column<Product, String> imageColumn;
+	private TextColumn<Product> idColumn, nameColumn, categoryColumn, priceColumn;
+	private Button addButton, removeButton, editButton;
+	private CheckboxCell isAvailable;
 	private Label productLabel;
 	
 	public ProductsLayout() {
 		initialize();
 		
 		this.add(horizontalPanel);;
-		this.add(productTable);
-		
+		this.add(productTable);		
 	}
 	
 	private void initialize() {
@@ -63,10 +70,90 @@ public class ProductsLayout extends VerticalPanel {
 		productTable = new CellTable<>();
 		productTable.setPageSize(100);
 		
+		createTableColumns();
+	
+		productTable.setWidth("100%", true);
+
+		horizontalPanel = new HorizontalPanel();
+		horizontalPanel.add(addButton);
+		horizontalPanel.add(editButton);
+		horizontalPanel.add(removeButton);
+		horizontalPanel.add(productLabel);
+		horizontalPanel.setSpacing(15);
+	
+		selectionModel();
+//	inserts list of all products to table
+		refreshProductsTable();
+		
+		addButton.addClickHandler(new ClickHandler() {	
+			@Override
+			public void onClick(ClickEvent event) {
+				addProductLayout = new AddProductLayout();
+				add(addProductLayout);
+				addProductLayout.show();
+
+				saveButtonHandler();
+			}
+		});
+		
+		editButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selected = selectionModel.getSelectedObject();
+				editProductLayout = new EditProductLayout(selected);
+				add(editProductLayout);
+				editProductLayout.show();
+				
+				editProductLayout.updateButton.addClickHandler(new ClickHandler() {
+					@Override
+					public void onClick(ClickEvent event) {		
+							productService.updateProduct(editProductLayout.updateProduct(selected), new AsyncCallback<Boolean>() {
+								@Override
+								public void onFailure(Throwable caught) {
+									System.out.println("Failure: " + caught.getMessage());	
+								}
+			
+								@Override
+								public void onSuccess(Boolean result) {
+									Window.alert("Product has been updated");
+									refreshProductsTable();	;
+									editProductLayout.hide();
+								}
+							});
+						}
+					});
+			}
+		});
+		
+		removeButton.addClickHandler(new ClickHandler() {
+			@Override
+			public void onClick(ClickEvent event) {
+				selected = selectionModel.getSelectedObject();
+				productService.removeProduct(selected, new AsyncCallback<Boolean>() {
+					@Override
+					public void onFailure(Throwable caught) {
+						System.out.println("Failure: " + caught.getMessage());	
+					}
+
+					@Override
+					public void onSuccess(Boolean result) {
+						Window.alert("Product + " + selected.toString() + " has been deleted");
+						refreshProductsTable();	
+						removeButton.setEnabled(false);
+						editButton.setEnabled(false);
+						selectionModel.clear();
+					}
+				});
+			}
+		});
+		
+		
+	}	
+	
+	private void createTableColumns() {
 		idColumn = new TextColumn<Product>() {
 			@Override
 			public String getValue(Product product) {
-				System.out.println("Produkt id numer: " + product.getProductId());
 				return product.getProductId()  + "";
 			}
 		};
@@ -88,106 +175,44 @@ public class ProductsLayout extends VerticalPanel {
 				return String.valueOf(product.getPrice());
 			}
 		};
-		availableColumn = new TextColumn<Product>() {
+		
+		isAvailable = new CheckboxCell();
+		availableColumn = new Column<Product, Boolean>(isAvailable){
 			@Override
-			public String getValue(Product product) {
-				return Boolean.toString(product.isAvailable());
+			public Boolean getValue(Product product) {
+				return product.isAvailable();
+			}
+			@Override
+			public void render(Context context, Product product, SafeHtmlBuilder sb) {
+				if (product.isAvailable()) {
+					sb.appendHtmlConstant("<input type='checkbox' disabled=disabled checked></input>");
+				} else {
+					sb.appendHtmlConstant("<input type='checkbox' disabled=disabled></input>");
+				}
 			}
 		};
-		imageColumn = new TextColumn<Product>() {
+		
+		imageCell = new ClickableTextCell();
+		imageColumn = new Column<Product, String>(imageCell){
 			@Override
-			public String getValue(Product product) {
-				return product.getImage();
+			public void render(Context context, Product product, SafeHtmlBuilder sb) {
+				sb.appendHtmlConstant("<img width=\"100\" heigth=\"75\" src=" + product.getImage() + ">");
+				super.render(context, product, sb);
+			
 			}
+			@Override
+			public String getValue(Product object) {
+				return "";
+			}		
 		};
-
+		
 		productTable.addColumn(idColumn, "ID");
 		productTable.addColumn(nameColumn, "Name");
 		productTable.addColumn(categoryColumn, "Category");
 		productTable.addColumn(priceColumn, "Price");
 		productTable.addColumn(availableColumn, "Availablity");
 		productTable.addColumn(imageColumn, "Image");
-
-		horizontalPanel = new HorizontalPanel();
-		horizontalPanel.add(addButton);
-		horizontalPanel.add(editButton);
-		horizontalPanel.add(removeButton);
-		horizontalPanel.add(productLabel);
-		horizontalPanel.setSpacing(15);
-			
-		
-		selectionModel();
-//	sets list of all products to table
-		refreshProductsTable();
-		
-		addButton.addClickHandler(new ClickHandler() {	
-			@Override
-			public void onClick(ClickEvent event) {
-				addProductLayout = new AddProductLayout();
-				add(addProductLayout);
-				addProductLayout.show();
-				
-//				if (!addProductLayout.isShowing()) {
-//					refreshProductsTable();
-//				}
-//				productTable.redraw();
-				saveButtonHandler();
-			}
-		});
-		
-		editButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				selected = selectionModel.getSelectedObject();
-				editProductLayout = new EditProductLayout(selected);
-				add(editProductLayout);
-				editProductLayout.show();
-				
-				editProductLayout.updateButton.addClickHandler(new ClickHandler() {
-					@Override
-					public void onClick(ClickEvent event) {		
-
-							productService.updateProduct(editProductLayout.updateProduct(selected), new AsyncCallback<Boolean>() {
-								@Override
-								public void onFailure(Throwable caught) {
-									Window.alert("Coœ siê popsu³o");
-								}
-			
-								@Override
-								public void onSuccess(Boolean result) {
-									Window.alert("Update zrobiony");
-									refreshProductsTable();				
-								}
-							});
-						}
-					});
-			}
-		});
-		
-		removeButton.addClickHandler(new ClickHandler() {
-			@Override
-			public void onClick(ClickEvent event) {
-				selected = selectionModel.getSelectedObject();
-				productService.removeProduct(selected, new AsyncCallback<Boolean>() {
-					@Override
-					public void onFailure(Throwable caught) {
-						Window.alert("Some error occured");
-					}
-
-					@Override
-					public void onSuccess(Boolean result) {
-						Window.alert("Product + " + selected.toString() + " has been deleted");
-						refreshProductsTable();	
-						removeButton.setEnabled(false);
-						editButton.setEnabled(false);
-						selectionModel.clear();
-					}
-				});
-			}
-		});
-		
-		
-	}	
+	}
 	
 	private void selectionModel() {
 		selectionModel = new SingleSelectionModel<>();
@@ -199,7 +224,7 @@ public class ProductsLayout extends VerticalPanel {
 				if (selected != null) {
 					editButton.setEnabled(true);
 					removeButton.setEnabled(true);	
-					productLabel.setText("Name: " + selected.getName() + ", price: " + selected.getPrice()
+					productLabel.setText(selected.getName() + ", price: " + selected.getPrice()
 							+ ", Category: " + selected.getCategorySet().toString());
 				}	
 			}		
@@ -213,31 +238,32 @@ public class ProductsLayout extends VerticalPanel {
 				productService.addProduct(addProductLayout.createProduct(), new AsyncCallback<Boolean>() {
 					@Override
 					public void onFailure(Throwable caught) {
-						System.out.println("Error creating and adding new product");
+						System.out.println("Failure: " + caught.getMessage());	
 					}
 					@Override
 					public void onSuccess(Boolean result) {
-						refreshProductsTable();	
+						refreshProductsTable();
+						Window.alert("Product has been added");
+						addProductLayout.hide();
 					}
 				});
 			} 
 		});
 	}
 
-//	sets list of all products to table
 	public void refreshProductsTable() {
 		productService.getAllProducts(new AsyncCallback<List<Product>>() {	
 			@Override
 			public void onSuccess(List<Product> result) {
 				productTable.setRowCount(result.size(), true);
 				productTable.setRowData(0, result);	
+//			saves actual product list 
 				StaticFields.setProductsList(result);
 			}
 			
 			@Override
 			public void onFailure(Throwable caught) {
-				Window.alert("b³ad w huj");
-				
+				System.out.println("Failure: " + caught.getMessage());			
 			}
 		});
 	}
